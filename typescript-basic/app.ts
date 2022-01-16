@@ -61,3 +61,4 @@ cbFunc(1, n => {
 
 let dontKnow: unknown;
 dontKnow = 1;
+console.log("hello");

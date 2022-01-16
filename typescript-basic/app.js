@@ -1,3 +1,4 @@
+"use strict";
 // basic type
 // function addNumber(n1: number, n2: number) {
 //   if (typeof n1 == "number" && typeof n2 == "number") {
@@ -10,7 +11,7 @@
 //object type
 var animals = {
     name: "lion",
-    w: 123
+    w: 123,
 };
 var myFav;
 myFav = ["1", "2"];
@@ -22,7 +23,7 @@ var Gender;
 var person = {
     name: "quang",
     role: ["1", 2],
-    gender: Gender.men
+    gender: Gender.men,
 };
 console.log(person.gender);
 function combine(a, b, type) {
@@ -46,3 +47,6 @@ function cbFunc(a, cb) {
 cbFunc(1, function (n) {
     console.log("Hello " + n);
 });
+var dontKnow;
+dontKnow = 1;
+console.log("hello");
