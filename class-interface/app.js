@@ -22,7 +22,7 @@ var Animal = /** @class */ (function () {
     }
     Animal.prototype.instruction = function (height) {
         if (height === void 0) { height = 2; }
-        console.log("This is " + this.name + ". Height " + height);
+        console.log("This is ".concat(this.name, ". Height ").concat(height));
     };
     return Animal;
 }());

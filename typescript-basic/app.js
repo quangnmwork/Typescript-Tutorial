@@ -45,7 +45,7 @@ function cbFunc(a, cb) {
     console.log(cb(a));
 }
 cbFunc(1, function (n) {
-    console.log("Hello " + n);
+    console.log("Hello ".concat(n));
 });
 var dontKnow;
 dontKnow = 1;
