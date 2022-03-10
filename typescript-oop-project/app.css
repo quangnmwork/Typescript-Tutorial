@@ -1,0 +1,95 @@
+*,
+*::after,
+*::before {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+:root {
+  --color-main: rgba(71, 139, 214, 1);
+  --color-main-second: rgba(37, 216, 211, 1);
+  --color-gray: rgb(230, 230, 230);
+  --color-white: #fff;
+  --font-default: 20px;
+}
+body {
+  background-image: linear-gradient(
+    132.6deg,
+    var(--color-main) 23.3%,
+    var(--color-main-second) 84.7%
+  );
+  position: relative;
+  height: 100vh;
+}
+.form {
+  position: absolute;
+  background-color: var(--color-white);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px;
+}
+.form-group {
+  width: 100%;
+  margin-top: 20px;
+}
+.todo-input {
+  padding: 6px 10px;
+  width: 100%;
+  border-radius: 3px;
+  font-size: var(--font-default);
+}
+.todo-input:focus {
+  outline: none;
+}
+.form-select {
+  width: 100%;
+  padding: 5px 10px;
+  font-size: var(--font-default);
+}
+.form-select:focus {
+  outline: none;
+}
+.form-button {
+  width: 100%;
+  font-size: var(--font-default);
+  background-color: var(--color-main-second);
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  color: var(--color-white);
+  padding: 5px 0px;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+.form-button:hover {
+  background-color: var(--color-main);
+}
+.todo-type {
+  display: flex;
+  justify-content: center;
+}
+.todo-type__item {
+  width: 500%;
+  text-align: center;
+  cursor: pointer;
+  padding: 5px 0;
+  font-size: var(--font-default);
+  border-bottom: 2px solid var(--color-main-second);
+}
+.todo-type__item:hover {
+  background-color: var(--color-gray);
+}
+
+.todo-type__active {
+  background-color: var(--color-main-second);
+  color: var(--color-white);
+}
+.todo-type__active:hover {
+  background-color: var(--color-main-second);
+  color: var(--color-white);
+}
