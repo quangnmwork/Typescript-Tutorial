@@ -1,27 +1,47 @@
-class UserInput {
+abstract class TodoComponent<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
-  hostElement: HTMLFormElement;
-  element: HTMLDivElement;
+  hostElement: T;
+  element: U;
+  constructor(templateId: string, hostId: string, isRenderAtStart: boolean) {
+    this.templateElement = document.getElementById(
+      templateId
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById(hostId)! as T;
+    const importNode = document.importNode(this.templateElement.content, true)!;
+    this.element = importNode.firstElementChild as U;
+    this.render(isRenderAtStart);
+  }
+  render(isRenderAtStart: boolean) {
+    this.hostElement.insertAdjacentElement(
+      isRenderAtStart ? "afterbegin" : "beforeend",
+      this.element
+    );
+  }
+}
+
+class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
+  constructor() {
+    super("todo-list", "app", false);
+  }
+}
+
+class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
   todoInput: HTMLInputElement;
   typeInput: HTMLSelectElement;
   constructor() {
-    this.templateElement = document.querySelector(
-      "#form-input"
-    )! as HTMLTemplateElement;
-    this.hostElement = document.getElementById("app")! as HTMLFormElement;
-    const importNode = document.importNode(this.templateElement.content, true)!;
-    this.element = importNode.firstElementChild as HTMLDivElement;
+    super("form-input", "app", true);
     this.todoInput = this.element.querySelector(
       ".todo-input"
     )! as HTMLInputElement;
     this.typeInput = this.element.querySelector(
       ".form-select"
     )! as HTMLSelectElement;
-    this.render();
   }
   getInput() {}
   render() {
     this.hostElement.insertAdjacentElement("afterbegin", this.element);
   }
 }
-const userInput = new UserInput();
+
+const todoInput = new TodoInput();
+const todoList = new TodoList();

@@ -8,6 +8,7 @@
 :root {
   --color-main: rgba(71, 139, 214, 1);
   --color-main-second: rgba(37, 216, 211, 1);
+  --color-red: rgb(255, 62, 62);
   --color-gray: rgb(230, 230, 230);
   --color-white: #fff;
   --font-default: 20px;
@@ -21,12 +22,13 @@ body {
   position: relative;
   height: 100vh;
 }
-.form {
-  position: absolute;
+.template-position {
+  width: 30%;
+  margin: 0 auto;
+  margin-top: 50px;
   background-color: var(--color-white);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+}
+.form {
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -92,4 +94,33 @@ body {
 .todo-type__active:hover {
   background-color: var(--color-main-second);
   color: var(--color-white);
+}
+.todo-container {
+  background-color: var(--color-white);
+}
+.list-todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+.list-todo-des {
+  font-size: var(--font-default);
+}
+.list-todo-btn {
+  margin-right: 5px;
+  margin-left: 5px;
+  padding: 5px 10px;
+  outline: none;
+  border-radius: 5px;
+  border: none;
+  font-size: var(--font-default);
+  color: var(--color-white);
+  cursor: pointer;
+}
+.list-todo-check {
+  background-color: var(--color-main-second);
+}
+.list-todo-del {
+  background-color: var(--color-red);
 }
