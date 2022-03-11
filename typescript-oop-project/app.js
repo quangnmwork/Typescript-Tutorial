@@ -1,4 +1,3 @@
-"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -14,17 +13,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-exports.__esModule = true;
-var validation_decorators_1 = require("./validation.decorators");
 var TodoStatus;
 (function (TodoStatus) {
     TodoStatus[TodoStatus["Active"] = 0] = "Active";
@@ -46,6 +34,31 @@ var State = /** @class */ (function () {
     };
     return State;
 }());
+var TabPanelProvider = /** @class */ (function () {
+    function TabPanelProvider() {
+        this.panel = TodoStatus.Active;
+    }
+    TabPanelProvider.getInstance = function () {
+        if (!this._instance) {
+            return new TabPanelProvider();
+        }
+        else
+            return this._instance;
+    };
+    Object.defineProperty(TabPanelProvider.prototype, "typePanel", {
+        get: function () {
+            return this.panel;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    TabPanelProvider.prototype.switchType = function () {
+        this.panel =
+            this.panel == TodoStatus.Active ? TodoStatus.Finished : TodoStatus.Active;
+    };
+    return TabPanelProvider;
+}());
+var tabPanelProvider = TabPanelProvider.getInstance();
 var TodoProvider = /** @class */ (function (_super) {
     __extends(TodoProvider, _super);
     function TodoProvider() {
@@ -98,6 +111,7 @@ var TodoComponent = /** @class */ (function () {
         this.hostElement = document.getElementById(hostId);
         var importNode = document.importNode(this.templateElement.content, true);
         this.element = importNode.firstElementChild;
+        // console.log(this.element, this.templateElement, this.hostElement);
         this.render(isRenderAtStart);
     }
     TodoComponent.prototype.render = function (isRenderAtStart) {
@@ -105,15 +119,51 @@ var TodoComponent = /** @class */ (function () {
     };
     return TodoComponent;
 }());
-// class TodoItem extends TodoComponent<HTMLDivElement,HTMLDivElement> {
-// }
+var TodoItem = /** @class */ (function (_super) {
+    __extends(TodoItem, _super);
+    function TodoItem() {
+        return _super.call(this, "list-todo-ul", "todo-container", false) || this;
+    }
+    TodoItem.prototype.eventListener = function () { };
+    return TodoItem;
+}(TodoComponent));
 var TodoList = /** @class */ (function (_super) {
     __extends(TodoList, _super);
     function TodoList() {
-        return _super.call(this, "todo-list", "app", false) || this;
+        var _this = _super.call(this, "todo-list", "app", false) || this;
+        _this.activeType = _this.element.querySelector("#active");
+        _this.finishedType = _this.element.querySelector("#finished");
+        _this.eventListener();
+        _this.updateMount();
+        return _this;
     }
     TodoList.prototype.mount = function () { };
-    TodoList.prototype.updateMount = function () { };
+    TodoList.prototype.resetPanel = function () {
+        this.activeType.classList.remove("todo-type__active");
+        this.finishedType.classList.remove("todo-type__active");
+    };
+    TodoList.prototype.updateMount = function () {
+        this.resetPanel();
+        if (tabPanelProvider.typePanel === TodoStatus.Active) {
+            this.activeType.classList.add("todo-type__active");
+        }
+        else {
+            this.finishedType.classList.add("todo-type__active");
+        }
+    };
+    TodoList.prototype.eventListener = function () {
+        var _this = this;
+        this.activeType.addEventListener("click", function (e) {
+            e.preventDefault();
+            tabPanelProvider.switchType();
+            _this.updateMount();
+        });
+        this.finishedType.addEventListener("click", function (e) {
+            e.preventDefault();
+            tabPanelProvider.switchType();
+            _this.updateMount();
+        });
+    };
     return TodoList;
 }(TodoComponent));
 var TodoInput = /** @class */ (function (_super) {
@@ -129,11 +179,9 @@ var TodoInput = /** @class */ (function (_super) {
     TodoInput.prototype.submitHandler = function (a) {
         console.log(a);
     };
-    __decorate([
-        validation_decorators_1.validate,
-        __param(0, validation_decorators_1.nameBeginWithCapital)
-    ], TodoInput.prototype, "submitHandler");
+    TodoInput.prototype.eventListener = function () { };
     return TodoInput;
 }(TodoComponent));
 var todoInput = new TodoInput();
 var todoList = new TodoList();
+var todoItem = new TodoItem();

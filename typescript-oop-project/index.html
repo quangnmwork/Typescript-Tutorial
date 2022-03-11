@@ -24,25 +24,29 @@
     </template>
     <template id="todo-list">
       <div class="template-position">
-        <div class="todo-container">
+        <div class="todo-container" id="todo-container">
           <nav class="todo-type">
-            <div class="todo-type__item todo-type__active">Progress</div>
-            <div class="todo-type__item">Finished</div>
+            <div class="todo-type__item todo-type__active" id="active">
+              Active
+            </div>
+            <div class="todo-type__item" id="finished">Finished</div>
           </nav>
-          <div class="list-todo">
-            <!-- <div class="list-todo-item">
-              <p class="list-todo-des">Hello</p>
-              <div class="list-todo-handler">
-                <button class="list-todo-btn list-todo-check">Done</button
-                ><button class="list-todo-btn list-todo-del">Del</button>
+          <template id="list-todo-ul">
+            <div class="list-todo">
+              <div class="list-todo-item">
+                <p class="list-todo-des">Hello</p>
+                <div class="list-todo-handler">
+                  <button class="list-todo-btn list-todo-check">Done</button
+                  ><button class="list-todo-btn list-todo-del">Del</button>
+                </div>
               </div>
-            </div> -->
-          </div>
+            </div>
+          </template>
         </div>
       </div>
     </template>
     <div id="app"></div>
-    <script src="bundle.js" defer></script>
+    <script src="app.js" defer></script>
     <!-- <script src="test-bundle.js"></script> -->
   </body>
 </html>
