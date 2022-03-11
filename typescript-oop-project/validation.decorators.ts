@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-const checkCapitalMetadataKey = Symbol("CheckCapital");
+const checkCapitalMetadataKey = "CheckCapital";
 
 export function nameBeginWithCapital(
   target: Object,
@@ -16,13 +16,14 @@ export function nameBeginWithCapital(
     target,
     propertyKey
   );
+  // console.log(existingCapitalParameters);
 }
 
-export function validate(
+export const validate = (
   target: any,
   propertyName: string,
-  descriptor: TypedPropertyDescriptor<any>
-) {
+  descriptor: PropertyDescriptor
+) => {
   console.log(target, propertyName, descriptor);
   // let method = descriptor.value;
   // descriptor.value = function () {
@@ -40,4 +41,4 @@ export function validate(
   //   }
 
   //   return method!.apply(this, arguments);
-}
+};

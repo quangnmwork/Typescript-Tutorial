@@ -25,6 +25,73 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 exports.__esModule = true;
 var validation_decorators_1 = require("./validation.decorators");
+var TodoStatus;
+(function (TodoStatus) {
+    TodoStatus[TodoStatus["Active"] = 0] = "Active";
+    TodoStatus[TodoStatus["Finished"] = 1] = "Finished";
+})(TodoStatus || (TodoStatus = {}));
+var Todo = /** @class */ (function () {
+    function Todo(id, todoInput, todoStatus) {
+        this.id = id;
+        this.todoInput = todoInput;
+        this.todoStatus = todoStatus;
+    }
+    return Todo;
+}());
+var State = /** @class */ (function () {
+    function State() {
+    }
+    State.prototype.dispatchListener = function (listener) {
+        this.listeners.push(listener);
+    };
+    return State;
+}());
+var TodoProvider = /** @class */ (function (_super) {
+    __extends(TodoProvider, _super);
+    function TodoProvider() {
+        var _this = _super.call(this) || this;
+        _this.listTodo = [];
+        return _this;
+    }
+    TodoProvider.getInstance = function () {
+        if (!this._instance) {
+            return new TodoProvider();
+        }
+        else
+            return this._instance;
+    };
+    TodoProvider.prototype.addTodo = function (todo) {
+        this.listTodo.push(todo);
+        this.updateListener();
+    };
+    TodoProvider.prototype.removeTodo = function (todo) {
+        var removeIndex = this.listTodo.findIndex(function (el) {
+            return (el.id = todo.id);
+        });
+        if (removeIndex) {
+            this.listTodo = this.listTodo.splice(removeIndex, 1);
+            this.updateListener();
+        }
+    };
+    TodoProvider.prototype.editStatusIndex = function (todo) {
+        var editIndex = this.listTodo.findIndex(function (el) {
+            return (el.id = todo.id);
+        });
+        this.listTodo[editIndex].todoStatus =
+            this.listTodo[editIndex].todoStatus == TodoStatus.Active
+                ? TodoStatus.Finished
+                : TodoStatus.Active;
+        this.updateListener();
+    };
+    TodoProvider.prototype.updateListener = function () {
+        for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
+            var listenerFn = _a[_i];
+            listenerFn(this.listTodo.slice());
+        }
+    };
+    return TodoProvider;
+}(State));
+var todoProvider = TodoProvider.getInstance();
 var TodoComponent = /** @class */ (function () {
     function TodoComponent(templateId, hostId, isRenderAtStart) {
         this.templateElement = document.getElementById(templateId);
@@ -38,11 +105,15 @@ var TodoComponent = /** @class */ (function () {
     };
     return TodoComponent;
 }());
+// class TodoItem extends TodoComponent<HTMLDivElement,HTMLDivElement> {
+// }
 var TodoList = /** @class */ (function (_super) {
     __extends(TodoList, _super);
     function TodoList() {
         return _super.call(this, "todo-list", "app", false) || this;
     }
+    TodoList.prototype.mount = function () { };
+    TodoList.prototype.updateMount = function () { };
     return TodoList;
 }(TodoComponent));
 var TodoInput = /** @class */ (function (_super) {

@@ -2,14 +2,15 @@
 exports.__esModule = true;
 exports.validate = exports.nameBeginWithCapital = void 0;
 require("reflect-metadata");
-var checkCapitalMetadataKey = Symbol("CheckCapital");
+var checkCapitalMetadataKey = "CheckCapital";
 function nameBeginWithCapital(target, propertyKey, parameterIndex) {
     var existingCapitalParameters = Reflect.getOwnMetadata(checkCapitalMetadataKey, target, propertyKey) || [];
     existingCapitalParameters.push(parameterIndex);
     Reflect.defineMetadata(checkCapitalMetadataKey, existingCapitalParameters, target, propertyKey);
+    // console.log(existingCapitalParameters);
 }
 exports.nameBeginWithCapital = nameBeginWithCapital;
-function validate(target, propertyName, descriptor) {
+var validate = function (target, propertyName, descriptor) {
     console.log(target, propertyName, descriptor);
     // let method = descriptor.value;
     // descriptor.value = function () {
@@ -26,5 +27,5 @@ function validate(target, propertyName, descriptor) {
     //     }
     //   }
     //   return method!.apply(this, arguments);
-}
+};
 exports.validate = validate;
