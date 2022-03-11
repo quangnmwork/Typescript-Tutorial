@@ -1,3 +1,5 @@
+import { nameBeginWithCapital, validate } from "./validation.decorators";
+
 abstract class TodoComponent<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
   hostElement: T;
@@ -28,6 +30,7 @@ class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
 class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
   todoInput: HTMLInputElement;
   typeInput: HTMLSelectElement;
+  buttonInput: HTMLButtonElement;
   constructor() {
     super("form-input", "app", true);
     this.todoInput = this.element.querySelector(
@@ -36,10 +39,14 @@ class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
     this.typeInput = this.element.querySelector(
       ".form-select"
     )! as HTMLSelectElement;
+    this.buttonInput = this.element.querySelector(
+      ".form-button"
+    )! as HTMLButtonElement;
   }
   getInput() {}
-  render() {
-    this.hostElement.insertAdjacentElement("afterbegin", this.element);
+  @validate
+  submitHandler(@nameBeginWithCapital a: string) {
+    console.log(a);
   }
 }
 

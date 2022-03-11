@@ -6,13 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "lite-server",
-    "tsc": "tsc ./generics/app.ts"
+    "tsc": "start tsc ./typescript-oop-project/app.ts && start tsc ./typescript-oop-project/validation.decorators.ts",
+    "browser": "browserify ./typescript-oop-project/app.js -o ./typescript-oop-project/bundle.js "
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "lite-server": "^2.6.1",
+    "reflect-metadata": "^0.1.13",
     "typescript": "^4.5.4"
   }
 }
