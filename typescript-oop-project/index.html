@@ -9,18 +9,20 @@
   </head>
   <body>
     <template id="form-input"
-      ><form class="form template-position" id="user-input">
-        <div class="form-group">
-          <input class="todo-input" type="text" placeholder="Add todo" />
-        </div>
-        <div class="form-group">
-          <select class="form-select">
-            <option class="form-option" value="progress">Progess</option>
-            <option class="form-option" value="finish">Finished</option>
-          </select>
-        </div>
-        <div class="form-group"><button class="form-button">Add</button></div>
-      </form>
+      ><div>
+        <form class="form template-position" id="user-input">
+          <div class="form-group">
+            <input class="todo-input" type="text" placeholder="Add todo" />
+          </div>
+          <div class="form-group">
+            <select class="form-select">
+              <option class="form-option" value="active">Active</option>
+              <option class="form-option" value="finish">Finished</option>
+            </select>
+          </div>
+          <div class="form-group"><button class="form-button">Add</button></div>
+        </form>
+      </div>
     </template>
     <template id="todo-list">
       <div class="template-position">
@@ -32,15 +34,15 @@
             <div class="todo-type__item" id="finished">Finished</div>
           </nav>
           <template id="list-todo-ul">
-            <div class="list-todo">
-              <div class="list-todo-item">
-                <p class="list-todo-des">Hello</p>
-                <div class="list-todo-handler">
-                  <button class="list-todo-btn list-todo-check">Done</button
-                  ><button class="list-todo-btn list-todo-del">Del</button>
-                </div>
+            <!-- <div class="list-todo"> -->
+            <div class="list-todo-item">
+              <p class="list-todo-des">Hello</p>
+              <div class="list-todo-handler">
+                <button class="list-todo-btn list-todo-check">Done</button
+                ><button class="list-todo-btn list-todo-del">Del</button>
               </div>
             </div>
+            <!-- </div> -->
           </template>
         </div>
       </div>

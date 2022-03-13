@@ -28,6 +28,7 @@ var Todo = /** @class */ (function () {
 }());
 var State = /** @class */ (function () {
     function State() {
+        this.listeners = [];
     }
     State.prototype.dispatchListener = function (listener) {
         this.listeners.push(listener);
@@ -52,9 +53,8 @@ var TabPanelProvider = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    TabPanelProvider.prototype.switchType = function () {
-        this.panel =
-            this.panel == TodoStatus.Active ? TodoStatus.Finished : TodoStatus.Active;
+    TabPanelProvider.prototype.switchType = function (status) {
+        this.panel = status;
     };
     return TabPanelProvider;
 }());
@@ -73,9 +73,13 @@ var TodoProvider = /** @class */ (function (_super) {
         else
             return this._instance;
     };
+    TodoProvider.prototype.getAllTodo = function () {
+        // console.log("GetallTodo", this.listTodo);
+        return this.updateListener();
+    };
     TodoProvider.prototype.addTodo = function (todo) {
+        console.log("add to do call");
         this.listTodo.push(todo);
-        this.updateListener();
     };
     TodoProvider.prototype.removeTodo = function (todo) {
         var removeIndex = this.listTodo.findIndex(function (el) {
@@ -83,7 +87,6 @@ var TodoProvider = /** @class */ (function (_super) {
         });
         if (removeIndex) {
             this.listTodo = this.listTodo.splice(removeIndex, 1);
-            this.updateListener();
         }
     };
     TodoProvider.prototype.editStatusIndex = function (todo) {
@@ -94,13 +97,19 @@ var TodoProvider = /** @class */ (function (_super) {
             this.listTodo[editIndex].todoStatus == TodoStatus.Active
                 ? TodoStatus.Finished
                 : TodoStatus.Active;
-        this.updateListener();
     };
     TodoProvider.prototype.updateListener = function () {
-        for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
-            var listenerFn = _a[_i];
-            listenerFn(this.listTodo.slice());
+        // console.log(this.listeners.length);
+        if (this.listeners.length) {
+            var todoList_1 = [];
+            for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
+                var listenerFn = _a[_i];
+                console.log("function", listenerFn);
+                todoList_1 = listenerFn(this.listTodo.slice());
+            }
+            return todoList_1;
         }
+        return [];
     };
     return TodoProvider;
 }(State));
@@ -131,10 +140,11 @@ var TodoList = /** @class */ (function (_super) {
     __extends(TodoList, _super);
     function TodoList() {
         var _this = _super.call(this, "todo-list", "app", false) || this;
+        _this.todoList = [];
         _this.activeType = _this.element.querySelector("#active");
         _this.finishedType = _this.element.querySelector("#finished");
+        _this.filterTodo(tabPanelProvider.typePanel);
         _this.eventListener();
-        _this.updateMount();
         return _this;
     }
     TodoList.prototype.mount = function () { };
@@ -151,17 +161,31 @@ var TodoList = /** @class */ (function (_super) {
             this.finishedType.classList.add("todo-type__active");
         }
     };
+    TodoList.prototype.filterTodo = function (status) {
+        todoProvider.dispatchListener(function (todoItems) {
+            return todoItems.filter(function (todo) { return todo.todoStatus == status; });
+        });
+    };
+    TodoList.prototype.renderTodoItem = function () { };
     TodoList.prototype.eventListener = function () {
         var _this = this;
         this.activeType.addEventListener("click", function (e) {
             e.preventDefault();
-            tabPanelProvider.switchType();
+            tabPanelProvider.switchType(TodoStatus.Active);
             _this.updateMount();
+            _this.filterTodo(tabPanelProvider.typePanel);
+            todoProvider.getAllTodo();
+            // console.log(todoProvider.getAllTodo());
+            // console.log("this todo list", this.todoList);
         });
         this.finishedType.addEventListener("click", function (e) {
             e.preventDefault();
-            tabPanelProvider.switchType();
+            tabPanelProvider.switchType(TodoStatus.Finished);
             _this.updateMount();
+            _this.filterTodo(tabPanelProvider.typePanel);
+            todoProvider.getAllTodo();
+            // console.log(todoProvider.getAllTodo());
+            // console.log("this todo list", this.todoList);
         });
     };
     return TodoList;
@@ -172,16 +196,30 @@ var TodoInput = /** @class */ (function (_super) {
         var _this = _super.call(this, "form-input", "app", true) || this;
         _this.todoInput = _this.element.querySelector(".todo-input");
         _this.typeInput = _this.element.querySelector(".form-select");
-        _this.buttonInput = _this.element.querySelector(".form-button");
+        _this.formSubmit = _this.element.querySelector("#user-input");
+        _this.eventListener();
         return _this;
     }
-    TodoInput.prototype.getInput = function () { };
-    TodoInput.prototype.submitHandler = function (a) {
-        console.log(a);
+    TodoInput.prototype.getInput = function () {
+        return [
+            this.todoInput.value,
+            this.typeInput.value == "active"
+                ? TodoStatus.Active
+                : TodoStatus.Finished,
+        ];
     };
-    TodoInput.prototype.eventListener = function () { };
+    TodoInput.prototype.eventListener = function () {
+        var _this = this;
+        this.formSubmit.addEventListener("submit", function (e) {
+            var _a = _this.getInput(), todoInput = _a[0], typeInput = _a[1];
+            var newTodo = new Todo(Date.now().toString(), todoInput, typeInput);
+            e.preventDefault();
+            todoProvider.addTodo(newTodo);
+            // console.log(todoProvider.getAllTodo());
+        });
+    };
     return TodoInput;
 }(TodoComponent));
-var todoInput = new TodoInput();
 var todoList = new TodoList();
 var todoItem = new TodoItem();
+var todoInput = new TodoInput();

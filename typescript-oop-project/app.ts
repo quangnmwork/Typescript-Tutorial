@@ -1,5 +1,3 @@
-type Listener<T> = (items: T[]) => void;
-
 enum TodoStatus {
   Active,
   Finished,
@@ -12,9 +10,9 @@ class Todo {
     public todoStatus: TodoStatus
   ) {}
 }
-
+type Listener<T> = (items: T[]) => Todo[];
 class State<T> {
-  protected listeners: Listener<T>[];
+  protected listeners: Listener<T>[] = [];
   dispatchListener(listener: Listener<T>) {
     this.listeners.push(listener);
   }
@@ -31,9 +29,8 @@ class TabPanelProvider {
   get typePanel() {
     return this.panel;
   }
-  switchType() {
-    this.panel =
-      this.panel == TodoStatus.Active ? TodoStatus.Finished : TodoStatus.Active;
+  switchType(status: TodoStatus) {
+    this.panel = status;
   }
 }
 const tabPanelProvider = TabPanelProvider.getInstance();
@@ -49,9 +46,13 @@ class TodoProvider extends State<Todo> {
   constructor() {
     super();
   }
+  getAllTodo() {
+    // console.log("GetallTodo", this.listTodo);
+    return this.updateListener();
+  }
   addTodo(todo: Todo) {
+    console.log("add to do call");
     this.listTodo.push(todo);
-    this.updateListener();
   }
   removeTodo(todo: Todo) {
     const removeIndex: number = this.listTodo.findIndex((el) => {
@@ -59,7 +60,6 @@ class TodoProvider extends State<Todo> {
     });
     if (removeIndex) {
       this.listTodo = this.listTodo.splice(removeIndex, 1);
-      this.updateListener();
     }
   }
   editStatusIndex(todo: Todo) {
@@ -70,12 +70,18 @@ class TodoProvider extends State<Todo> {
       this.listTodo[editIndex].todoStatus == TodoStatus.Active
         ? TodoStatus.Finished
         : TodoStatus.Active;
-    this.updateListener();
   }
-  private updateListener() {
-    for (let listenerFn of this.listeners) {
-      listenerFn(this.listTodo.slice());
+  private updateListener(): Todo[] {
+    // console.log(this.listeners.length);
+    if (this.listeners.length) {
+      let todoList: Todo[] = [];
+      for (let listenerFn of this.listeners) {
+        console.log("function", listenerFn);
+        todoList = listenerFn(this.listTodo.slice());
+      }
+      return todoList;
     }
+    return [];
   }
 }
 const todoProvider = TodoProvider.getInstance();
@@ -114,12 +120,13 @@ class TodoItem extends TodoComponent<HTMLDivElement, HTMLDivElement> {
 class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
   activeType: HTMLDivElement;
   finishedType: HTMLDivElement;
+  todoList: Todo[] = [];
   constructor() {
     super("todo-list", "app", false);
     this.activeType = this.element.querySelector("#active");
     this.finishedType = this.element.querySelector("#finished");
+    this.filterTodo(tabPanelProvider.typePanel);
     this.eventListener();
-    this.updateMount();
   }
 
   mount() {}
@@ -135,16 +142,31 @@ class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
       this.finishedType.classList.add("todo-type__active");
     }
   }
+  filterTodo(status: TodoStatus) {
+    todoProvider.dispatchListener((todoItems: Todo[]) => {
+      return todoItems.filter((todo) => todo.todoStatus == status);
+    });
+  }
+  renderTodoItem() {}
   eventListener(): void {
     this.activeType.addEventListener("click", (e) => {
       e.preventDefault();
-      tabPanelProvider.switchType();
+      tabPanelProvider.switchType(TodoStatus.Active);
       this.updateMount();
+      this.filterTodo(tabPanelProvider.typePanel);
+      todoProvider.getAllTodo();
+      // console.log(todoProvider.getAllTodo());
+      // console.log("this todo list", this.todoList);
     });
     this.finishedType.addEventListener("click", (e) => {
       e.preventDefault();
-      tabPanelProvider.switchType();
+      tabPanelProvider.switchType(TodoStatus.Finished);
       this.updateMount();
+      this.filterTodo(tabPanelProvider.typePanel);
+      todoProvider.getAllTodo();
+      // console.log(todoProvider.getAllTodo());
+
+      // console.log("this todo list", this.todoList);
     });
   }
 }
@@ -152,7 +174,7 @@ class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
 class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
   todoInput: HTMLInputElement;
   typeInput: HTMLSelectElement;
-  buttonInput: HTMLButtonElement;
+  formSubmit: HTMLFormElement;
   constructor() {
     super("form-input", "app", true);
     this.todoInput = this.element.querySelector(
@@ -161,18 +183,31 @@ class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
     this.typeInput = this.element.querySelector(
       ".form-select"
     )! as HTMLSelectElement;
-    this.buttonInput = this.element.querySelector(
-      ".form-button"
-    )! as HTMLButtonElement;
-  }
-  getInput() {}
+    this.formSubmit = this.element.querySelector(
+      "#user-input"
+    )! as HTMLFormElement;
 
-  submitHandler(a: string) {
-    console.log(a);
+    this.eventListener();
   }
-  eventListener(): void {}
+  getInput(): [string, TodoStatus] {
+    return [
+      this.todoInput.value,
+      this.typeInput.value == "active"
+        ? TodoStatus.Active
+        : TodoStatus.Finished,
+    ];
+  }
+
+  eventListener(): void {
+    this.formSubmit.addEventListener("submit", (e) => {
+      const [todoInput, typeInput] = this.getInput();
+      let newTodo = new Todo(Date.now().toString(), todoInput, typeInput);
+      e.preventDefault();
+      todoProvider.addTodo(newTodo);
+      // console.log(todoProvider.getAllTodo());
+    });
+  }
 }
-
-const todoInput = new TodoInput();
 const todoList = new TodoList();
 const todoItem = new TodoItem();
+const todoInput = new TodoInput();
