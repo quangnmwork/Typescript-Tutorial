@@ -22,6 +22,11 @@ body {
   position: relative;
   height: 100vh;
 }
+.template-item {
+  width: 30%;
+  margin: 0 auto;
+  background-color: var(--color-white);
+}
 .template-position {
   width: 30%;
   margin: 0 auto;

@@ -46,37 +46,31 @@ class TodoProvider extends State<Todo> {
   constructor() {
     super();
   }
+  get length() {
+    return this.listTodo.length;
+  }
   getAllTodo() {
     // console.log("GetallTodo", this.listTodo);
     return this.updateListener();
   }
   addTodo(todo: Todo) {
-    console.log("add to do call");
     this.listTodo.push(todo);
   }
-  removeTodo(todo: Todo) {
-    const removeIndex: number = this.listTodo.findIndex((el) => {
-      return (el.id = todo.id);
-    });
-    if (removeIndex) {
-      this.listTodo = this.listTodo.splice(removeIndex, 1);
-    }
+  removeTodo(id: string) {
+    this.listTodo = this.listTodo.filter((todoItem) => todoItem.id !== id);
   }
-  editStatusIndex(todo: Todo) {
+  editStatusIndex(id: string) {
     const editIndex: number = this.listTodo.findIndex((el) => {
-      return (el.id = todo.id);
+      return el.id == id;
     });
-    this.listTodo[editIndex].todoStatus =
-      this.listTodo[editIndex].todoStatus == TodoStatus.Active
-        ? TodoStatus.Finished
-        : TodoStatus.Active;
+    this.listTodo[editIndex].todoStatus = TodoStatus.Finished;
   }
   private updateListener(): Todo[] {
     // console.log(this.listeners.length);
     if (this.listeners.length) {
       let todoList: Todo[] = [];
       for (let listenerFn of this.listeners) {
-        console.log("function", listenerFn);
+        // console.log("function", listenerFn);
         todoList = listenerFn(this.listTodo.slice());
       }
       return todoList;
@@ -90,13 +84,17 @@ abstract class TodoComponent<T extends HTMLElement, U extends HTMLElement> {
   templateElement: HTMLTemplateElement;
   hostElement: T;
   element: U;
+
   constructor(templateId: string, hostId: string, isRenderAtStart: boolean) {
     this.templateElement = document.getElementById(
       templateId
     )! as HTMLTemplateElement;
+    // console.log(this.templateElement, templateId);
     this.hostElement = document.getElementById(hostId)! as T;
+
     const importNode = document.importNode(this.templateElement.content, true)!;
     this.element = importNode.firstElementChild as U;
+
     // console.log(this.element, this.templateElement, this.hostElement);
     this.render(isRenderAtStart);
   }
@@ -107,32 +105,54 @@ abstract class TodoComponent<T extends HTMLElement, U extends HTMLElement> {
     );
   }
   abstract eventListener(): void;
-}
-
-class TodoItem extends TodoComponent<HTMLDivElement, HTMLDivElement> {
-  todo: Todo;
-  constructor() {
-    super("list-todo-ul", "todo-container", false);
-  }
-  eventListener(): void {}
+  abstract mount(): void;
 }
 
 class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
   activeType: HTMLDivElement;
   finishedType: HTMLDivElement;
   todoList: Todo[] = [];
+
   constructor() {
     super("todo-list", "app", false);
-    this.activeType = this.element.querySelector("#active");
-    this.finishedType = this.element.querySelector("#finished");
-    this.filterTodo(tabPanelProvider.typePanel);
+    this.mount();
     this.eventListener();
   }
-
-  mount() {}
+  mount() {
+    this.activeType = this.element.querySelector("#active");
+    this.finishedType = this.element.querySelector("#finished");
+  }
   resetPanel() {
     this.activeType.classList.remove("todo-type__active");
     this.finishedType.classList.remove("todo-type__active");
+  }
+  renderTodoList() {
+    this.filterTodo(tabPanelProvider.typePanel);
+    this.todoList = todoProvider.getAllTodo();
+    this.element.querySelector("#list-todo-ul").innerHTML = ``;
+    this.todoList.forEach((todoItem) => {
+      this.element
+        .querySelector("#list-todo-ul")
+        .insertAdjacentHTML("afterbegin", `${this.convertTodoItem(todoItem)}`);
+    });
+  }
+  convertTodoItem(todoItem: Todo) {
+    if (todoItem.todoStatus == TodoStatus.Active) {
+      return `<div class="template-item" id=${todoItem.id}><div class="list-todo-item" >
+    <p class="list-todo-des">${todoItem.todoInput}</p>
+    <div class="list-todo-handler">
+      <button class="list-todo-btn list-todo-check">Done</button
+      ><button class="list-todo-btn list-todo-del">Del</button>
+    </div>
+  </div></div>`;
+    } else {
+      return `<div class="template-item" id=${todoItem.id}><div class="list-todo-item" >
+     <p class="list-todo-des">${todoItem.todoInput}</p>
+     <div class="list-todo-handler">
+       <button class="list-todo-btn list-todo-del">Del</button>
+     </div>
+   </div></div>`;
+    }
   }
   updateMount() {
     this.resetPanel();
@@ -147,36 +167,60 @@ class TodoList extends TodoComponent<HTMLDivElement, HTMLDivElement> {
       return todoItems.filter((todo) => todo.todoStatus == status);
     });
   }
-  renderTodoItem() {}
+  handlerActionItem() {
+    if (this.element.querySelectorAll(".template-item").length) {
+      this.element.querySelectorAll(".template-item").forEach((todoItem) => {
+        todoItem
+          .querySelector(".list-todo-check")
+          ?.addEventListener("click", (e) => {
+            e.preventDefault();
+            todoProvider.editStatusIndex(todoItem.id);
+            this.activeType.click();
+          });
+        todoItem
+          .querySelector(".list-todo-del")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            console.log(todoItem.id);
+            todoProvider.removeTodo(todoItem.id);
+            if (tabPanelProvider.typePanel === TodoStatus.Active) {
+              this.activeType.click();
+            } else {
+              this.finishedType.click();
+            }
+            console.log(todoProvider.getAllTodo());
+          });
+      });
+    }
+  }
   eventListener(): void {
     this.activeType.addEventListener("click", (e) => {
       e.preventDefault();
       tabPanelProvider.switchType(TodoStatus.Active);
       this.updateMount();
-      this.filterTodo(tabPanelProvider.typePanel);
-      todoProvider.getAllTodo();
-      // console.log(todoProvider.getAllTodo());
-      // console.log("this todo list", this.todoList);
+      this.renderTodoList();
+      this.handlerActionItem();
     });
     this.finishedType.addEventListener("click", (e) => {
       e.preventDefault();
       tabPanelProvider.switchType(TodoStatus.Finished);
       this.updateMount();
-      this.filterTodo(tabPanelProvider.typePanel);
-      todoProvider.getAllTodo();
-      // console.log(todoProvider.getAllTodo());
-
-      // console.log("this todo list", this.todoList);
+      this.renderTodoList();
+      this.handlerActionItem();
     });
   }
 }
-
+const todoList = new TodoList();
 class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
   todoInput: HTMLInputElement;
   typeInput: HTMLSelectElement;
   formSubmit: HTMLFormElement;
   constructor() {
     super("form-input", "app", true);
+    this.mount();
+    this.eventListener();
+  }
+  mount() {
     this.todoInput = this.element.querySelector(
       ".todo-input"
     )! as HTMLInputElement;
@@ -186,8 +230,6 @@ class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
     this.formSubmit = this.element.querySelector(
       "#user-input"
     )! as HTMLFormElement;
-
-    this.eventListener();
   }
   getInput(): [string, TodoStatus] {
     return [
@@ -201,13 +243,19 @@ class TodoInput extends TodoComponent<HTMLDivElement, HTMLFormElement> {
   eventListener(): void {
     this.formSubmit.addEventListener("submit", (e) => {
       const [todoInput, typeInput] = this.getInput();
-      let newTodo = new Todo(Date.now().toString(), todoInput, typeInput);
+      let newTodo = new Todo(
+        (todoProvider.length + 1).toString(),
+        todoInput,
+        typeInput
+      );
       e.preventDefault();
       todoProvider.addTodo(newTodo);
-      // console.log(todoProvider.getAllTodo());
+      if (tabPanelProvider.typePanel === TodoStatus.Active) {
+        todoList.activeType.click();
+      } else {
+        todoList.finishedType.click();
+      }
     });
   }
 }
-const todoList = new TodoList();
-const todoItem = new TodoItem();
 const todoInput = new TodoInput();
